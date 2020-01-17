@@ -140,18 +140,33 @@ done
 echo "GRID_USER=$GRID_USER"
 echo "GRID_HOME=$GRID_HOME"
 
-# Check if resources already exist
-$GRID_HOME/bin/crs_stat $INSTNAME > /dev/null
-if [[ $? -eq 0 ]]; then
+# crs_stat is not available after 11g, and crsctl output is ever 0, so we need to count.
+
+# Check if resources already exist (OLD)
+#$GRID_HOME/bin/crs_stat $INSTNAME > /dev/null
+#if [[ $? -eq 0 ]]; then
+#  echo "Clusterware already has resource '$INSTNAME' configured" >&2
+#  exit 1
+#fi
+
+#$GRID_HOME/bin/crs_stat $VIPNAME > /dev/null
+#if [[ $? -eq 0 ]]; then
+#  echo "Clusterware already has resource '$VIPNAME' configured" >&2
+#  exit 1
+#fi
+
+# Check if resources already exist (NEW)
+# Tested on Grid 19c
+if [[ `$GRID_HOME/bin/crsctl stat res $INSTNAME | grep "Could not find resource" | wc -l` -eq 0 ]]; then
   echo "Clusterware already has resource '$INSTNAME' configured" >&2
   exit 1
 fi
 
-$GRID_HOME/bin/crs_stat $VIPNAME > /dev/null
-if [[ $? -eq 0 ]]; then
+if [[ `$GRID_HOME/bin/crsctl stat res $VIPNAME | grep "Could not find resource" | wc -l` -eq 0 ]]; then
   echo "Clusterware already has resource '$VIPNAME' configured" >&2
   exit 1
 fi
+
 
 # Read the correct instance config
 # Here is should declare BINDADDR
